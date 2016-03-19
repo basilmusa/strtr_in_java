@@ -1,5 +1,5 @@
 # strtr in Java
-This class provides two public static methods that provide strtr similar functionality in java:
+This class provides two public static methods that provide strtr similar functionality in java. This is not a port from the strtr code base, the implementation uses a different algorithm. The name Strtr has been used to make it easy for developers to find this page on google coming from a PHP background.
 
 You can use it directly by calling:
 
@@ -7,7 +7,6 @@ You can use it directly by calling:
     String result = Strtr.replaceStringUsingChars(String haystack, String from, String to);
     
 php strtr similar functionality in java
-
 
 ##Example Usage
 
