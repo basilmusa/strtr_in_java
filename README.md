@@ -1,4 +1,11 @@
-# strtr_in_java
+# strtr in Java
+This class provides two public static methods that provide strtr similar functionality in java:
+
+You can use it directly by calling:
+
+    String result = Strtr.replaceStringUsingMap(String haystack, Map<String, String> needle2replacement);
+    String result = Strtr.replaceStringUsingChars(String haystack, String from, String to);
+    
 php strtr similar functionality in java
 
 
