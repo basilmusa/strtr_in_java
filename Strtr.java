@@ -38,14 +38,17 @@ public class Strtr {
 		return replaceStringUsingMap(haystack, replacements);
 	}
 	
+	public static enum ReplaceOptions {
+		DEFAULT_MAP_ORDERING,
+		LONGER_KEYS_FIRST;
+	}
+
+
 	/**
-	 * This method will return a string by replacing all occurrences of keys in needle2replacement occurring in
-	 * haystack with the corresponding values. Once a replacement is made, it wont be replaced again.
+	 * This method delegates to {@link #replaceStringUsingMap(String, Map, ReplaceOptions)} passing it the {@link ReplaceOptions#LONGER_KEYS_FIRST} option
+	 * which means it will replace the longer keys first.
 	 * 
-	 * The method will start with the longest keys first.
-	 * Keys of "" (empty strings) will be ignored.
-	 * 
-	 * If the map is empty, the method returns the same haystack String directly.
+	 * @see #replaceStringUsingMap(String, Map, ReplaceOptions)
 	 * 
 	 * @param haystack The string to be replaced
 	 * @param needle2replacement The map of keys to search and values to be replaced
@@ -53,13 +56,37 @@ public class Strtr {
 	 */
 	public static String replaceStringUsingMap(String haystack, Map<String, String> needle2replacement)
 	{
+		return replaceStringUsingMap(haystack, needle2replacement, ReplaceOptions.LONGER_KEYS_FIRST);
+	}
+
+	/**
+	 * This method will return a string by replacing all occurrences of keys in needle2replacement occurring in
+	 * haystack with the corresponding values. Once a replacement is made, it won't be replaced again.
+	 * 
+	 * The ReplaceOptions:
+	 *  - if passed {@value ReplaceOptions#LONGER_KEYS_FIRST} it will replace the longer key strings first 
+	 *  - if passed {@link ReplaceOptions#DEFAULT_MAP_ORDERING} it will replace based on the order of the keys in the map.
+	 * 
+	 * Notes:
+	 * - Keys of "" (empty strings) will be ignored.
+	 *  
+	 * @param haystack
+	 * @param needle2replacement
+	 * @param replaceOptions
+	 * @return
+	 */
+	public static String replaceStringUsingMap(String haystack, Map<String, String> needle2replacement, ReplaceOptions replaceOptions)
+	{
 		// To optimize, just return the haystack if the map has no items
 		if (needle2replacement.isEmpty()) {
 			return haystack;
 		}
 		
-		// Sort map by length of keys please by longest string first
-		Map<String, String> sortedNeedle2replacement = sortKeysByLengthDescending(needle2replacement);
+		Map<String, String> sortedNeedle2replacement = needle2replacement;
+		if (replaceOptions == ReplaceOptions.LONGER_KEYS_FIRST) {
+			// Sort map by length of keys please by longest string first
+			sortedNeedle2replacement = sortKeysByLengthDescending(needle2replacement);
+		}
 		
 		Set<String> arrNeedles = sortedNeedle2replacement.keySet();
 		List<Range> ranges = new ArrayList<>();
@@ -74,11 +101,12 @@ public class Strtr {
 				continue;
 			}
 			
+			String replacement = sortedNeedle2replacement.get(needle);
+			if (replacement == null) {
+				throw new IllegalArgumentException("Map value of null found in key ['" + needle + "']");
+			}
+			
 			while(-1 != (indexOf = haystack.indexOf(needle, indexOf + 1))) {
-				String replacement = sortedNeedle2replacement.get(needle);
-				if (replacement == null) {
-					throw new IllegalArgumentException("Map value of null found in key ['" + needle + "']");
-				}
 				
 				Range range = new Range(indexOf, indexOf + needle.length() - 1, needle, replacement);
 				
